@@ -1,9 +1,12 @@
 function createModel() {
-    alert($('#code').val());
     fetch(
         'http://localhost:1111/upload',
         {
             method: 'post',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
             body: JSON.stringify({
                 data: $('#code').val(),
             }),
@@ -13,5 +16,5 @@ function createModel() {
     })
         .catch(error => {
             console.log(error)
-        })
+        });
 }
