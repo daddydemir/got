@@ -4,7 +4,7 @@ function createModel() {
         {
             method: 'post',
             headers: {
-                'Accept': 'application/json',
+                'Accept': 'text/plain',
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
@@ -12,7 +12,11 @@ function createModel() {
             }),
         }
     ).then(response => {
-        console.log(response)
+        console.log(response);
+        let area = document.getElementById('output');
+        area.value = '';
+        area.value = response;
+        alert(response);
     })
         .catch(error => {
             console.log(error)
