@@ -1,61 +1,85 @@
 package core
 
+import (
+	"github.com/daddydemir/got/models"
+	"strconv"
+	"strings"
+)
+
+var fields []string
+var objects []models.Object
+var object string
+
 func ParseWithJson(request string) {
-	//structCreator(request)
 	getFields(request)
+	toObject()
+	structCreator("YeniObje")
 }
 
 func structCreator(name string) {
-	def := "type " + name + " struct {"
-
+	def := "type " + name + " struct {\n"
+	for _, obj := range objects {
+		def += "\t" + obj.Name + "\t" + obj.Type + "\n"
+	}
 	def += " }"
-	println(def)
+	object = def
 }
 
+const (
+	STRING = "string"
+	NUMBER = "int"
+	BOOL   = "bool"
+	DOUBLE = "float32"
+)
+
 func getFields(r string) {
-	status := false
-	fieldStatus := false
+	lines := strings.Split(r, ",")
 	field := ""
-	var fields []string
-	var realFields []string
-	lastIndex := 0
-	for i := 0; i < len(r); i++ {
-		if string(r[i]) == "{" {
-			status = true
-		} else if string(r[i]) == "}" {
-			status = false
-		}
+	collection := false
+	dendenIndex := 0
+	for i := 0; i < len(lines); i++ {
+		line := lines[i]
+		lr := strings.Split(line, ":")
+		for _, c := range lr {
+			for l := 0; l < len(c); l++ {
+				if string(c[l]) == "\"" {
+					collection = !collection
+					if field != "" && field != " " {
+						fields = append(fields, field)
+					}
+					field = ""
+					dendenIndex = l
+					continue
+				}
 
-		if status {
-			if string(r[i]) == "\"" {
-				fieldStatus = !fieldStatus
-				temp := string(r[lastIndex:i])
-				println(temp)
-				continue
+				if collection {
+					field += string(c[l])
+				}
+
+				if l+1 == len(c) && string(c[l]) != "\"" && string(c[l]) != "}" {
+					fields = append(fields, c[dendenIndex:l+1])
+				}
 			}
-		}
-
-		if string(r[i]) == ":" {
-			lastIndex = i + 1
-			/*
-				i = index
-			*/
-		}
-
-		if fieldStatus {
-			field += string(r[i])
-		} else {
-			if field != "" {
-				//fmt.Println(field)
-				fields = append(fields, field)
-			}
-			field = ""
-		}
-
-		if !fieldStatus && string(r[i]) == ":" {
-			realFields = append(realFields, fields[len(fields)-1])
+			dendenIndex = 0
 		}
 	}
-	//fmt.Println(fields)
-	//fmt.Println(realFields)
+}
+
+func toObject() {
+
+	var o models.Object
+	for i := 0; i < len(fields); i += 2 {
+		v := strings.Trim(fields[i+1], " ")
+		if v == "false" || v == "true" {
+			o = models.Object{Name: fields[i], Type: BOOL}
+		} else if _, e := strconv.Atoi(v); e == nil {
+			o = models.Object{Name: fields[i], Type: NUMBER}
+		} else if _, e := strconv.ParseFloat(v, 32); e == nil {
+			o = models.Object{Name: fields[i], Type: DOUBLE}
+		} else {
+			o = models.Object{Name: fields[i], Type: STRING}
+		}
+		objects = append(objects, o)
+
+	}
 }
