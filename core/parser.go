@@ -1,6 +1,7 @@
 package core
 
 import (
+	"fmt"
 	"github.com/daddydemir/got/models"
 	"strconv"
 	"strings"
@@ -8,21 +9,78 @@ import (
 
 var fields []string
 var objects []models.Object
+var Objects []models.Object
 var object string
+var getters []string
+var setters []string
 
+// problem is array reference,
+func getterCreator(modelName string) {
+	def := ""
+	for i, obj := range objects {
+		def += "func (" + string(obj.Name[0:1]) + " " + modelName + ") " + Objects[i].Name + "() " + obj.Type + " { \n"
+		def += "\treturn " + string(obj.Name[0:1]) + "." + Objects[i].Name + "\n"
+		def += "}\n"
+		getters = append(getters, def)
+		println(def)
+		def = ""
+	}
+}
+
+func setterCreator(modelName string) {
+	def := ""
+	for i, obj := range objects {
+		def += "func (" + string(obj.Name[0:1]) + " " + modelName + ") " + "Set" + Objects[i].Name + "(" + obj.Name + " " + obj.Type + ") {\n"
+		def += "\t " + string(obj.Name[0:1]) + "." + obj.Name + " = " + obj.Name + "\n"
+		def += "}\n"
+		setters = append(setters, def)
+		fmt.Println(def)
+		def = ""
+	}
+}
 func ParseWithJson(request string) {
 	getFields(request)
 	toObject()
-	structCreator("YeniObje")
+	serialize()
+	structCreator("Model")
+	getterCreator("Model")
+	setterCreator("Model")
+	fmt.Println(object)
 }
 
 func structCreator(name string) {
 	def := "type " + name + " struct {\n"
-	for _, obj := range objects {
+	for _, obj := range Objects {
 		def += "\t" + obj.Name + "\t" + obj.Type + "\n"
 	}
 	def += " }"
 	object = def
+}
+
+func initialLetterLarger(v string) string {
+	temp := ""
+	for i := 0; i < len(v); i++ {
+		if i == 0 {
+			temp += strings.ToLower(string(v[i]))
+		} else {
+			temp += string(v[i])
+		}
+	}
+	return temp
+}
+
+func serialize() {
+
+	for i, v := range Objects {
+		v.Name = initialLetterLarger(v.Name)
+		if v.Type == BOOL {
+			if v.Name[0:2] == "is" {
+				Objects[i].Name = initialLetterLarger(v.Name)
+			}
+		} else {
+			Objects[i].Name = initialLetterLarger(v.Name)
+		}
+	}
 }
 
 const (
@@ -80,6 +138,6 @@ func toObject() {
 			o = models.Object{Name: fields[i], Type: STRING}
 		}
 		objects = append(objects, o)
-
 	}
+	Objects = objects
 }
