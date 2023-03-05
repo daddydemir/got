@@ -14,7 +14,7 @@ func Creator(data string) {
 	c := make(map[string]json.RawMessage)
 	err := json.Unmarshal([]byte(data), &c)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println("json'a cevirirken hata: ", err)
 	}
 
 	keys := make([]string, len(c))

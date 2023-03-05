@@ -2,6 +2,8 @@ package core
 
 import (
 	"fmt"
+	"os"
+	"strings"
 
 	"github.com/daddydemir/got/models"
 )
@@ -18,11 +20,10 @@ var mod string
 
 // problem is array reference,
 func getterCreator(modelName string) {
-	fmt.Println("getterCreator is start --")
 	def := ""
 	tmp := ""
 	for i, obj := range objects {
-		def += "func (" + string(obj.Name[0:1]) + " " + modelName + ") " + Objects[i].Name + "() " + obj.Type + " { \n"
+		def += "func (" + string(obj.Name[0:1]) + " " + modelName + ") " + strings.Title(strings.ToLower(Objects[i].Name)) + "() " + obj.Type + " { \n"
 		def += "\treturn " + string(obj.Name[0:1]) + "." + Objects[i].Name + "\n"
 		def += "}\n\n"
 		getters = append(getters, def)
@@ -30,15 +31,13 @@ func getterCreator(modelName string) {
 		def = ""
 	}
 	get = tmp
-	fmt.Println(get)
 }
 
 func setterCreator(modelName string) {
-	fmt.Println("setterCreator is start --")
 	def := ""
 	tmp := ""
 	for i, obj := range objects {
-		def += "func (" + string(obj.Name[0:1]) + " *" + modelName + ") " + "Set" + Objects[i].Name + "(" + obj.Name + " " + obj.Type + ") {\n"
+		def += "func (" + string(obj.Name[0:1]) + " *" + modelName + ") " + "Set" + strings.Title(strings.ToLower(Objects[i].Name)) + "(" + obj.Name + " " + obj.Type + ") {\n"
 		def += "\t " + string(obj.Name[0:1]) + "." + obj.Name + " = " + obj.Name + "\n"
 		def += "}\n\n"
 		setters = append(setters, def)
@@ -46,26 +45,25 @@ func setterCreator(modelName string) {
 		def = ""
 	}
 	set = tmp
-	fmt.Println(set)
 }
-func ParseWithJson(request string) {
+func ParseWithJson(request string, name string) string {
 	Creator(request)
 	objects = Objects
-	structCreator("Model")
-	getterCreator("Model")
-	setterCreator("Model")
+	structCreator(name)
+	getterCreator(name)
+	setterCreator(name)
+	createAll(name)
+	return mod + get + set
 }
 
 func structCreator(name string) {
-	fmt.Println("structCreator is start --")
-	def := "type " + name + " struct {\n"
+	def := "package main\n\ntype " + name + " struct {\n"
 	for _, obj := range Objects {
 		def += "\t" + obj.Name + "\t" + obj.Type + "\n"
 	}
 	def += " }\n"
 	object = def
 	mod = def
-	fmt.Println(def)
 }
 
 const (
@@ -74,3 +72,11 @@ const (
 	BOOL   = "bool"
 	DOUBLE = "float32"
 )
+
+func createAll(name string) {
+	err := os.WriteFile("./output/"+name+".go", []byte(mod+get+set), 0644)
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(name, "is created at location:", "./output/"+name+".go")
+}

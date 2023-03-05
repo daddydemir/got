@@ -7,11 +7,12 @@ import (
 )
 
 func createModelHandler(c *fiber.Ctx) error {
+	println(c.Method())
 	if c.Method() == "POST" {
 		var request models.ParseModel
 		_ = c.BodyParser(&request)
-		core.ParseWithJson(request.Data)
-		return c.Send([]byte(request.Data))
+		response := core.ParseWithJson(request.Data, "file")
+		return c.SendString(response)
 	} else {
 		return c.SendString("get method")
 	}
