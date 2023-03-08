@@ -1,6 +1,6 @@
 function createModel() {
     fetch(
-        'http://localhost:1345/upload',
+        'http://localhost:7777/upload',
         {
             method: 'post',
             headers: {
@@ -12,13 +12,10 @@ function createModel() {
             }),
         }
     ).then(response => {
-        console.log(response);
+        return response.text();
+    }).then(function (data){
         let area = document.getElementById('output');
         area.value = '';
-        area.value = response;
-        alert(response);
-    })
-        .catch(error => {
-            console.log(error)
-        });
+        area.value = data;
+    });
 }

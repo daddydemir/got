@@ -12,6 +12,7 @@ var modelList []models.Object
 
 func Creator(data string) {
 	c := make(map[string]json.RawMessage)
+	fmt.Println("gelen :", data)
 	err := json.Unmarshal([]byte(data), &c)
 	if err != nil {
 		fmt.Println("json'a cevirirken hata: ", err)
