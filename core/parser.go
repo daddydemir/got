@@ -1,7 +1,7 @@
 package core
 
 import (
-	"fmt"
+	"log"
 	"os"
 	"strings"
 
@@ -17,14 +17,15 @@ var setters []string
 var get string
 var set string
 var mod string
+var nameOfModel string
 
 // problem is array reference,
 func getterCreator(modelName string) {
 	def := ""
 	tmp := ""
 	for i, obj := range objects {
-		def += "func (" + string(obj.Name[0:1]) + " " + modelName + ") " + strings.Title(strings.ToLower(Objects[i].Name)) + "() " + obj.Type + " { \n"
-		def += "\treturn " + string(obj.Name[0:1]) + "." + Objects[i].Name + "\n"
+		def += "func (" + string(nameOfModel[0:1]) + " " + modelName + ") " + strings.Title(strings.ToLower(Objects[i].Name)) + "() " + obj.Type + " { \n"
+		def += "\treturn " + string(nameOfModel[0:1]) + "." + Objects[i].Name + "\n"
 		def += "}\n\n"
 		getters = append(getters, def)
 		tmp += def
@@ -37,8 +38,8 @@ func setterCreator(modelName string) {
 	def := ""
 	tmp := ""
 	for i, obj := range objects {
-		def += "func (" + string(obj.Name[0:1]) + " *" + modelName + ") " + "Set" + strings.Title(strings.ToLower(Objects[i].Name)) + "(" + obj.Name + " " + obj.Type + ") {\n"
-		def += "\t " + string(obj.Name[0:1]) + "." + obj.Name + " = " + obj.Name + "\n"
+		def += "func (" + string(nameOfModel[0:1]) + " *" + modelName + ") " + "Set" + strings.Title(strings.ToLower(Objects[i].Name)) + "(" + obj.Name + " " + obj.Type + ") {\n"
+		def += "\t " + string(nameOfModel[0:1]) + "." + obj.Name + " = " + obj.Name + "\n"
 		def += "}\n\n"
 		setters = append(setters, def)
 		tmp += def
@@ -46,7 +47,9 @@ func setterCreator(modelName string) {
 	}
 	set = tmp
 }
+
 func ParseWithJson(request string, name string) string {
+	nameOfModel = name
 	Creator(request)
 	objects = Objects
 	structCreator(name)
@@ -57,7 +60,7 @@ func ParseWithJson(request string, name string) string {
 }
 
 func structCreator(name string) {
-	def := "package main\n\ntype " + name + " struct {\n"
+	def := "package models\n\ntype " + name + " struct {\n"
 	for _, obj := range Objects {
 		def += "\t" + obj.Name + "\t" + obj.Type + "\n"
 	}
@@ -76,7 +79,7 @@ const (
 func createAll(name string) {
 	err := os.WriteFile("./output/"+name+".go", []byte(mod+get+set), 0644)
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 	}
-	fmt.Println(name, "is created at location:", "./output/"+name+".go")
+	log.Println(name, "is created at location:", "./output/"+name+".go")
 }

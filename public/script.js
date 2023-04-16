@@ -9,6 +9,7 @@ function createModel() {
             },
             body: JSON.stringify({
                 data: $('#code').val(),
+                pkg: $('#package').val(),
             }),
         }
     ).then(response => {

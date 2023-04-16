@@ -2,7 +2,7 @@ package core
 
 import (
 	"encoding/json"
-	"fmt"
+	"log"
 	"strconv"
 
 	"github.com/daddydemir/got/models"
@@ -12,10 +12,10 @@ var modelList []models.Object
 
 func Creator(data string) {
 	c := make(map[string]json.RawMessage)
-	fmt.Println("gelen :", data)
+	log.Println("gelen :", data)
 	err := json.Unmarshal([]byte(data), &c)
 	if err != nil {
-		fmt.Println("json'a cevirirken hata: ", err)
+		log.Println("json'a cevirirken hata: ", err)
 	}
 
 	keys := make([]string, len(c))
@@ -35,7 +35,7 @@ func Creator(data string) {
 		} else if _, e := strconv.ParseFloat(string(temp), 32); e == nil {
 			list[i] = models.Object{Name: s, Type: DOUBLE}
 		} else {
-			fmt.Println("hata")
+			log.Println("hata")
 		}
 		i++
 	}
